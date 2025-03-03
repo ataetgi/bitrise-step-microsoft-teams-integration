@@ -5,14 +5,14 @@
 ## [2.1.0] - 13th May 2021
 
 * [#28] Allow setting a custom timezone for 'Build Triggered' time
-* [#29] Added ability to add custom image to `MessageCard`. 
+* [#29] Added ability to add custom image to `AdaptiveCard`. 
 
 ## [2.0.0] - 28th Feb 2021
 
-* [#14] Added ability to declare custom `MessageCard` actions via JSON string
+* [#14] Added ability to declare custom `AdaptiveCard` actions via JSON string
 * [#17] Bumped step to use Go 1.16
 * [#18] Added additional Go test steps to `step.yml`
-* [#19] Fix `MessageCard` `ActivityImage` input
+* [#19] Fix `AdaptiveCard` `ActivityImage` input
 	* now correctly displays an image if image URL declared in step input
 * [#20] BREAKING: Step now uses "yes|no" values for inputs that were previously `bool` values
 
@@ -30,7 +30,7 @@
 
 ## [1.2.0] - 24th Jan 2021
 
-* MessageCard customisation
+* AdaptiveCard customisation
 	* ability to override each text field within the card
     * defaults to Bitrise environment variables if custom values not set
 * Migration to Go Modules

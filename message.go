@@ -1,49 +1,37 @@
 package main
 
-// Message to send to Microsoft Teams.
-type Message struct {
-	Type       string          `json:"@type"`
-	Context    string          `json:"@context"`
-	ThemeColor string          `json:"themeColor"`
-	Title      string          `json:"title"`
-	Summary    string          `json:"summary"`
-	Sections   []Section       `json:"sections"`
-	Actions    []OpenURIAction `json:"potentialAction"`
+// AdaptiveCard to send to Microsoft Teams.
+type AdaptiveCard struct {
+	Type    string              `json:"type"`
+	Version string              `json:"version"`
+	Body    []AdaptiveCardBody  `json:"body"`
+	Actions []AdaptiveCardAction `json:"actions"`
 }
 
-// Section to be shown in the message
-type Section struct {
-	ActivityTitle    string  `json:"activityTitle"`
-	ActivitySubtitle string  `json:"activitySubtitle"`
-	ActivityImage    string  `json:"activityImage"`
-	Facts            []Fact  `json:"facts"`
-	Markdown         bool    `json:"markdown"`
-	Text             string  `json:"text"`
-	HeroImage        Image   `json:"heroImage"`
-	Images           []Image `json:"images"`
+// AdaptiveCardBody represents the body of the AdaptiveCard
+type AdaptiveCardBody struct {
+	Type     string              `json:"type"`
+	Text     string              `json:"text,omitempty"`
+	Size     string              `json:"size,omitempty"`
+	Weight   string              `json:"weight,omitempty"`
+	Color    string              `json:"color,omitempty"`
+	Wrap     bool                `json:"wrap,omitempty"`
+	IsSubtle bool                `json:"isSubtle,omitempty"`
+	Items    []AdaptiveCardBody  `json:"items,omitempty"`
+	URL      string              `json:"url,omitempty"`
+	AltText  string              `json:"altText,omitempty"`
+	Facts    []AdaptiveCardFact  `json:"facts,omitempty"`
 }
 
-// Fact related to the message
-type Fact struct {
-	Name  string `json:"name"`
+// AdaptiveCardFact represents a fact in the AdaptiveCard
+type AdaptiveCardFact struct {
+	Title string `json:"title"`
 	Value string `json:"value"`
 }
 
-// OpenURIAction action for link buttons
-type OpenURIAction struct {
-	Type    string   `json:"@type"`
-	Name    string   `json:"name"`
-	Targets []Target `json:"targets"`
-}
-
-// Target object that resides inside `OpenUriAction`s
-type Target struct {
-	OS  string `json:"os"`
-	URI string `json:"uri"`
-}
-
-// Image that is displayed either within the Images section or as a HeroImage.
-type Image struct {
-	Image string `json:"image"`
+// AdaptiveCardAction represents an action in the AdaptiveCard
+type AdaptiveCardAction struct {
+	Type  string `json:"type"`
 	Title string `json:"title"`
+	URL   string `json:"url"`
 }

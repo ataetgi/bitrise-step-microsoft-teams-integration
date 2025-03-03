@@ -135,15 +135,30 @@ func TestBuildPrimarySection(t *testing.T) {
 	}
 	var tests = []struct {
 		input    config
-		expected Section
+		expected AdaptiveCardBody
 	}{
 		{
 			defaultValuesConfig,
-			Section{
-				ActivityTitle:    defaultValuesConfig.SectionTitle,
-				ActivitySubtitle: defaultValuesConfig.SectionSubtitle,
-				Text:             defaultValuesConfig.SectionText,
-				Markdown:         valueOptionToBool(defaultValuesConfig.EnablePrimarySectionMarkdown),
+			AdaptiveCardBody{
+				Type: "Container",
+				Items: []AdaptiveCardBody{
+					{
+						Type: "TextBlock",
+						Text: defaultValuesConfig.SectionTitle,
+						Weight: "Bolder",
+					},
+					{
+						Type: "TextBlock",
+						Text: defaultValuesConfig.SectionSubtitle,
+						IsSubtle: true,
+					},
+					{
+						Type: "TextBlock",
+						Text: defaultValuesConfig.SectionText,
+						Wrap: true,
+						IsSubtle: true,
+					},
+				},
 			},
 		},
 	}
@@ -160,33 +175,33 @@ func TestBuildFactsSection(t *testing.T) {
 	var tests = []struct {
 		input          config
 		isBuildSuccess bool
-		expected       Section
+		expected       AdaptiveCardBody
 	}{
 		// Successful build
 		{
 			mockConfig,
 			true,
-			Section{
-				Markdown: valueOptionToBool(mockConfig.EnableBuildFactsMarkdown),
-				Facts: []Fact{
+			AdaptiveCardBody{
+				Type: "FactSet",
+				Facts: []AdaptiveCardFact{
 					{
-						Name:  "Build Status",
+						Title: "Build Status",
 						Value: fmt.Sprintf(`<span style="color:#%s">Success</span>`, mockConfig.SuccessThemeColor),
 					},
 					{
-						Name:  "Build Number",
+						Title: "Build Number",
 						Value: mockConfig.BuildNumber,
 					},
 					{
-						Name:  "Git Branch",
+						Title: "Git Branch",
 						Value: mockConfig.GitBranch,
 					},
 					{
-						Name:  "Build Triggered",
+						Title: "Build Triggered",
 						Value: parsedUnixTime,
 					},
 					{
-						Name:  "Workflow",
+						Title: "Workflow",
 						Value: mockConfig.Workflow,
 					},
 				},
@@ -196,27 +211,27 @@ func TestBuildFactsSection(t *testing.T) {
 		{
 			mockConfig,
 			false,
-			Section{
-				Markdown: valueOptionToBool(mockConfig.EnableBuildFactsMarkdown),
-				Facts: []Fact{
+				AdaptiveCardBody{
+				Type: "FactSet",
+				Facts: []AdaptiveCardFact{
 					{
-						Name:  "Build Status",
+						Title: "Build Status",
 						Value: fmt.Sprintf(`<span style="color:#%s">Fail</span>`, mockConfig.FailedThemeColor),
 					},
 					{
-						Name:  "Build Number",
+						Title: "Build Number",
 						Value: mockConfig.BuildNumber,
 					},
 					{
-						Name:  "Git Branch",
+						Title: "Git Branch",
 						Value: mockConfig.GitBranch,
 					},
 					{
-						Name:  "Build Triggered",
+						Title: "Build Triggered",
 						Value: parsedUnixTime,
 					},
 					{
-						Name:  "Workflow",
+						Title: "Workflow",
 						Value: mockConfig.Workflow,
 					},
 				},
@@ -242,32 +257,36 @@ func TestBuildImagesSection(t *testing.T) {
 
 	var tests = []struct {
 		input    config
-		expected Section
+		expected AdaptiveCardBody
 	}{
 		{
 			defaultValuesConfig,
-			Section{
-				Images: []Image{
+			AdaptiveCardBody{
+				Type: "Container",
+				Items: []AdaptiveCardBody{
 					{
-						Image: defaultValuesConfig.SectionImage,
-						Title: defaultValuesConfig.SectionImageDescription,
+						Type: "Image",
+						URL: defaultValuesConfig.SectionImage,
+						AltText: defaultValuesConfig.SectionImageDescription,
 					},
 				},
 			},
 		},
 		{
 			emptyDescriptionConfig,
-			Section{
-				Images: []Image{
+			AdaptiveCardBody{
+				Type: "Container",
+				Items: []AdaptiveCardBody{
 					{
-						Image: emptyDescriptionConfig.SectionImage,
+						Type: "Image",
+						URL: emptyDescriptionConfig.SectionImage,
 					},
 				},
 			},
 		},
 		{
 			emptyImageConfig,
-			Section{},
+			AdaptiveCardBody{},
 		},
 	}
 
@@ -280,174 +299,175 @@ func TestBuildImagesSection(t *testing.T) {
 
 func TestNewMessage(t *testing.T) {
 
-	var buildSuccessFacts = Section{
-		Facts: []Fact{
+	var buildSuccessFacts = AdaptiveCardBody{
+		Type: "FactSet",
+		Facts: []AdaptiveCardFact{
 			{
-				Name:  "Build Status",
+				Title: "Build Status",
 				Value: fmt.Sprintf(`<span style="color:#%s">Success</span>`, mockConfig.SuccessThemeColor),
 			},
 			{
-				Name:  "Build Number",
+				Title: "Build Number",
 				Value: mockConfig.BuildNumber,
 			},
 			{
-				Name:  "Git Branch",
+				Title: "Git Branch",
 				Value: mockConfig.GitBranch,
 			},
 			{
-				Name:  "Build Triggered",
+				Title: "Build Triggered",
 				Value: parsedUnixTime,
 			},
 			{
-				Name:  "Workflow",
+				Title: "Workflow",
 				Value: mockConfig.Workflow,
 			},
 		},
-		Markdown:  valueOptionToBool(mockConfig.EnableBuildFactsMarkdown),
-		HeroImage: Image{},
 	}
 
-	var buildFailedFacts = Section{
-		Facts: []Fact{
+	var buildFailedFacts = AdaptiveCardBody{
+		Type: "FactSet",
+		Facts: []AdaptiveCardFact{
 			{
-				Name:  "Build Status",
+				Title: "Build Status",
 				Value: fmt.Sprintf(`<span style="color:#%s">Fail</span>`, mockConfig.FailedThemeColor),
 			},
 			{
-				Name:  "Build Number",
+				Title: "Build Number",
 				Value: mockConfig.BuildNumber,
 			},
 			{
-				Name:  "Git Branch",
+				Title: "Git Branch",
 				Value: mockConfig.GitBranch,
 			},
 			{
-				Name:  "Build Triggered",
+				Title: "Build Triggered",
 				Value: parsedUnixTime,
 			},
 			{
-				Name:  "Workflow",
+				Title: "Workflow",
 				Value: mockConfig.Workflow,
 			},
 		},
-		Markdown:  valueOptionToBool(mockConfig.EnableBuildFactsMarkdown),
-		HeroImage: Image{},
 	}
 
-	var primarySection = Section{
-		ActivityTitle:    mockConfig.SectionTitle,
-		ActivitySubtitle: mockConfig.SectionSubtitle,
-		ActivityImage:    mockConfig.SectionHeaderImage,
-		Markdown:         valueOptionToBool(mockConfig.EnablePrimarySectionMarkdown),
-		Text:             mockConfig.SectionText,
-		HeroImage:        Image{},
-	}
-
-	var imagesSection = Section{
-		Images: []Image{
+	var primarySection = AdaptiveCardBody{
+		Type: "Container",
+		Items: []AdaptiveCardBody{
 			{
-				Image: mockConfig.SectionImage,
-				Title: mockConfig.SectionImageDescription,
+				Type: "TextBlock",
+				Text: mockConfig.SectionTitle,
+				Weight: "Bolder",
+			},
+			{
+				Type: "TextBlock",
+				Text: mockConfig.SectionSubtitle,
+				IsSubtle: true,
+			},
+			{
+				Type: "TextBlock",
+				Text: mockConfig.SectionText,
+				Wrap: true,
+				IsSubtle: true,
 			},
 		},
 	}
 
-	var buildSuccessMessage = Message{
-		Type:       "MessageCard",
-		Context:    "http://schema.org/extensions",
-		ThemeColor: mockConfig.SuccessThemeColor,
-		Title:      mockConfig.CardTitle,
-		Summary:    fmt.Sprintf("%v #%v succeeded", mockConfig.AppTitle, mockConfig.BuildNumber),
-		// Be mindful of list order
-		Sections: []Section{primarySection, imagesSection, buildSuccessFacts},
-		Actions: []OpenURIAction{
+	var imagesSection = AdaptiveCardBody{
+		Type: "Container",
+		Items: []AdaptiveCardBody{
 			{
-				Type: "OpenUri",
-				Name: "Go To Repo",
-				Targets: []Target{
-					{
-						OS:  "default",
-						URI: mockConfig.RepoURL,
-					},
-				},
-			},
-			{
-				Type: "OpenUri",
-				Name: "Go To Build",
-				Targets: []Target{
-					{
-						OS:  "default",
-						URI: mockConfig.BuildURL,
-					},
-				},
-			},
-			{
-				Type: "OpenUri",
-				Name: "Some text",
-				Targets: []Target{
-					{
-						URI: "www.google.com",
-						OS:  "android",
-					},
-					{
-						URI: "www.google.com",
-						OS:  "iOS",
-					},
-					{
-						URI: "www.google.com",
-						OS:  "windows",
-					},
-				},
+				Type: "Image",
+				URL: mockConfig.SectionImage,
+				AltText: mockConfig.SectionImageDescription,
 			},
 		},
 	}
 
-	var buildFailedMessage = Message{
-		Type:       "MessageCard",
-		Context:    "http://schema.org/extensions",
-		ThemeColor: mockConfig.FailedThemeColor,
-		Title:      mockConfig.CardTitle,
-		Summary:    fmt.Sprintf("%v #%v failed", mockConfig.AppTitle, mockConfig.BuildNumber),
-		// Be mindful of list order
-		Sections: []Section{primarySection, imagesSection, buildFailedFacts},
-		Actions: []OpenURIAction{
+	var buildSuccessMessage = AdaptiveCard{
+		Type: "AdaptiveCard",
+		Version: "1.2",
+		Body: []AdaptiveCardBody{
 			{
-				Type: "OpenUri",
-				Name: "Go To Repo",
-				Targets: []Target{
-					{
-						OS:  "default",
-						URI: mockConfig.RepoURL,
-					},
-				},
+				Type: "TextBlock",
+				Text: optionalUserValue(mockConfig.AppTitle, mockConfig.CardTitle),
+				Size: "Large",
+				Weight: "Bolder",
 			},
 			{
-				Type: "OpenUri",
-				Name: "Go To Build",
-				Targets: []Target{
-					{
-						OS:  "default",
-						URI: mockConfig.BuildURL,
-					},
-				},
+				Type: "TextBlock",
+				Text: getValueForBuildStatus(
+					fmt.Sprintf("%s #%s succeeded", mockConfig.AppTitle, mockConfig.BuildNumber),
+					fmt.Sprintf("%s #%s failed", mockConfig.AppTitle, mockConfig.BuildNumber),
+					true,
+				),
+				Size: "Medium",
+				Weight: "Bolder",
+				Color: getValueForBuildStatus("Good", "Attention", true),
+			},
+			primarySection,
+			imagesSection,
+			buildSuccessFacts,
+		},
+		Actions: []AdaptiveCardAction{
+			{
+				Type: "Action.OpenUrl",
+				Title: "Go To Repo",
+				URL: mockConfig.RepoURL,
 			},
 			{
-				Type: "OpenUri",
-				Name: "Some text",
-				Targets: []Target{
-					{
-						URI: "www.google.com",
-						OS:  "android",
-					},
-					{
-						URI: "www.google.com",
-						OS:  "iOS",
-					},
-					{
-						URI: "www.google.com",
-						OS:  "windows",
-					},
-				},
+				Type: "Action.OpenUrl",
+				Title: "Go To Build",
+				URL: mockConfig.BuildURL,
+			},
+			{
+				Type: "Action.OpenUrl",
+				Title: "Some text",
+				URL: "www.google.com",
+			},
+		},
+	}
+
+	var buildFailedMessage = AdaptiveCard{
+		Type: "AdaptiveCard",
+		Version: "1.2",
+		Body: []AdaptiveCardBody{
+			{
+				Type: "TextBlock",
+				Text: optionalUserValue(mockConfig.AppTitle, mockConfig.CardTitle),
+				Size: "Large",
+				Weight: "Bolder",
+			},
+			{
+				Type: "TextBlock",
+				Text: getValueForBuildStatus(
+					fmt.Sprintf("%s #%s succeeded", mockConfig.AppTitle, mockConfig.BuildNumber),
+					fmt.Sprintf("%s #%s failed", mockConfig.AppTitle, mockConfig.BuildNumber),
+					false,
+				),
+				Size: "Medium",
+				Weight: "Bolder",
+				Color: getValueForBuildStatus("Good", "Attention", false),
+			},
+			primarySection,
+			imagesSection,
+			buildFailedFacts,
+		},
+		Actions: []AdaptiveCardAction{
+			{
+				Type: "Action.OpenUrl",
+				Title: "Go To Repo",
+				URL: mockConfig.RepoURL,
+			},
+			{
+				Type: "Action.OpenUrl",
+				Title: "Go To Build",
+				URL: mockConfig.BuildURL,
+			},
+			{
+				Type: "Action.OpenUrl",
+				Title: "Some text",
+				URL: "www.google.com",
 			},
 		},
 	}
@@ -455,7 +475,7 @@ func TestNewMessage(t *testing.T) {
 	var tests = []struct {
 		input          config
 		isBuildSuccess bool
-		expected       Message
+		expected       AdaptiveCard
 	}{
 		{
 			mockConfig,
@@ -474,83 +494,4 @@ func TestNewMessage(t *testing.T) {
 		}
 	}
 
-}
-
-func TestBuildURIAction(t *testing.T) {
-	var tests = []struct {
-		input    Action
-		expected OpenURIAction
-	}{
-		{
-			input: Action{
-				Text: "Action 1",
-				Targets: []ActionTarget{
-					{
-						URI: "https://www.google.com",
-					},
-				},
-			},
-			expected: OpenURIAction{
-				Type: "OpenUri",
-				Name: "Action 1",
-				Targets: []Target{
-					{
-						OS:  "default",
-						URI: "https://www.google.com",
-					},
-				},
-			},
-		},
-		{
-			input: Action{
-				Text: "Action 2",
-				Targets: []ActionTarget{
-					{
-						URI: "https://www.google.com",
-						OS:  "iOS",
-					},
-					{
-						URI: "https://www.google.com",
-						OS:  "android",
-					},
-					{
-						URI: "https://www.google.com",
-						OS:  "windows",
-					},
-					{
-						URI: "https://www.google.com",
-						OS:  "default",
-					},
-				},
-			},
-			expected: OpenURIAction{
-				Type: "OpenUri",
-				Name: "Action 2",
-				Targets: []Target{
-					{
-						OS:  "iOS",
-						URI: "https://www.google.com",
-					},
-					{
-						OS:  "android",
-						URI: "https://www.google.com",
-					},
-					{
-						OS:  "windows",
-						URI: "https://www.google.com",
-					},
-					{
-						OS:  "default",
-						URI: "https://www.google.com",
-					},
-				},
-			},
-		},
-	}
-
-	for _, test := range tests {
-		if output := buildURIAction(test.input); !reflect.DeepEqual(output, test.expected) {
-			t.Errorf("Test failed: config input was %v, expected %v", test.input, test.expected)
-		}
-	}
 }

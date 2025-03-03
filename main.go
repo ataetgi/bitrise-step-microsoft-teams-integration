@@ -54,137 +54,139 @@ func parseTimeString(cfg config) string {
 	return timeAtLoc.Format(time.RFC1123)
 }
 
-func newMessage(cfg config, buildSuccessful bool) Message {
-	message := Message{}
-	message.Type = "MessageCard"
-	message.Context = "http://schema.org/extensions"
-	message.ThemeColor = getValueForBuildStatus(
-		cfg.SuccessThemeColor,
-		cfg.FailedThemeColor,
-		buildSuccessful,
-	)
-	message.Title = optionalUserValue(cfg.AppTitle, cfg.CardTitle)
-	message.Summary = getValueForBuildStatus(
-		fmt.Sprintf("%s #%s succeeded", cfg.AppTitle, cfg.BuildNumber),
-		fmt.Sprintf("%s #%s failed", cfg.AppTitle, cfg.BuildNumber),
-		buildSuccessful,
-	)
-
-	// MessageCard sections
-	primarySection := buildPrimarySection(cfg)
-	imagesSection := buildImagesSection(cfg)
-	factsSection := buildFactsSection(cfg, buildSuccessful)
-	message.Sections = []Section{primarySection, imagesSection, factsSection}
-
-	// MessageCard Actions
-	actions := []OpenURIAction{}
-	if valueOptionToBool(cfg.EnableDefaultActions) {
-		goToRepoAction := buildURIAction(Action{
-			Text: "Go To Repo",
-			Targets: []ActionTarget{
-				{
-					URI: cfg.RepoURL,
-				},
-			},
-		})
-		goToBuildAction := buildURIAction(Action{
-			Text: "Go To Build",
-			Targets: []ActionTarget{
-				{
-					URI: cfg.BuildURL,
-				},
-			},
-		})
-		actions = append(actions, goToRepoAction, goToBuildAction)
+func newMessage(cfg config, buildSuccessful bool) AdaptiveCard {
+	message := AdaptiveCard{}
+	message.Type = "AdaptiveCard"
+	message.Version = "1.2"
+	message.Body = []AdaptiveCardBody{
+		{
+			Type: "TextBlock",
+			Text: optionalUserValue(cfg.AppTitle, cfg.CardTitle),
+			Size: "Large",
+			Weight: "Bolder",
+		},
+		{
+			Type: "TextBlock",
+			Text: getValueForBuildStatus(
+				fmt.Sprintf("%s #%s succeeded", cfg.AppTitle, cfg.BuildNumber),
+				fmt.Sprintf("%s #%s failed", cfg.AppTitle, cfg.BuildNumber),
+				buildSuccessful,
+			),
+			Size: "Medium",
+			Weight: "Bolder",
+			Color: getValueForBuildStatus("Good", "Attention", buildSuccessful),
+		},
+		buildPrimarySection(cfg),
+		buildImagesSection(cfg),
+		buildFactsSection(cfg, buildSuccessful),
 	}
-	customActions := parseActions(cfg.Actions)
-	for _, action := range customActions {
-		actions = append(actions, buildURIAction(action))
-	}
-	message.Actions = actions
+	message.Actions = buildActions(cfg, buildSuccessful)
 
 	return message
 }
 
-// Builds the primary section of the MessageCard content
-func buildPrimarySection(cfg config) Section {
-	section := Section{}
-	section.ActivityTitle = cfg.SectionTitle
-	section.ActivitySubtitle = cfg.SectionSubtitle
-	section.Text = cfg.SectionText
-	section.ActivityImage = cfg.SectionHeaderImage
-	section.Markdown = valueOptionToBool(cfg.EnablePrimarySectionMarkdown)
-	return section
-}
-
-// Builds a Section containing a list of Image
-func buildImagesSection(cfg config) Section {
-	section := Section{}
-	if cfg.SectionImage != "" {
-		image := Image{
-			Image: cfg.SectionImage,
-			Title: cfg.SectionImageDescription,
-		}
-		section.Images = []Image{image}
-	}
-	return section
-}
-
-// Builds a Section containing a list of Fact related to build status
-func buildFactsSection(cfg config, buildSuccessful bool) Section {
-	buildStatusFact := Fact{
-		Name: "Build Status",
-		Value: getValueForBuildStatus(
-			fmt.Sprintf(`<span style="color:#%s">Success</span>`, cfg.SuccessThemeColor),
-			fmt.Sprintf(`<span style="color:#%s">Fail</span>`, cfg.FailedThemeColor),
-			buildSuccessful,
-		),
-	}
-
-	buildNumberFact := Fact{
-		Name:  "Build Number",
-		Value: cfg.BuildNumber,
-	}
-
-	buildBranchFact := Fact{
-		Name:  "Git Branch",
-		Value: cfg.GitBranch,
-	}
-
-	buildTimeFact := Fact{
-		Name:  "Build Triggered",
-		Value: parseTimeString(cfg),
-	}
-
-	workflowFact := Fact{
-		Name:  "Workflow",
-		Value: cfg.Workflow,
-	}
-
-	return Section{
-		Markdown: valueOptionToBool(cfg.EnableBuildFactsMarkdown),
-		Facts:    []Fact{buildStatusFact, buildNumberFact, buildBranchFact, buildTimeFact, workflowFact},
+// Builds the primary section of the AdaptiveCard content
+func buildPrimarySection(cfg config) AdaptiveCardBody {
+	return AdaptiveCardBody{
+		Type: "Container",
+		Items: []AdaptiveCardBody{
+			{
+				Type: "TextBlock",
+				Text: cfg.SectionTitle,
+				Weight: "Bolder",
+			},
+			{
+				Type: "TextBlock",
+				Text: cfg.SectionSubtitle,
+				IsSubtle: true,
+			},
+			{
+				Type: "TextBlock",
+				Text: cfg.SectionText,
+				Wrap: true,
+				IsSubtle: true,
+			},
+		},
 	}
 }
 
-func buildURIAction(action Action) OpenURIAction {
-	uriAction := OpenURIAction{}
-	uriAction.Type = "OpenUri"
-	uriAction.Name = action.Text
-	targets := []Target{}
-	for _, target := range action.Targets {
-		uriTarget := Target{}
-		uriTarget.OS = optionalUserValue("default", target.OS)
-		uriTarget.URI = target.URI
-		targets = append(targets, uriTarget)
+// Builds a Container containing a list of Image
+func buildImagesSection(cfg config) AdaptiveCardBody {
+	if cfg.SectionImage == "" {
+		return AdaptiveCardBody{}
 	}
-	uriAction.Targets = targets
+	return AdaptiveCardBody{
+		Type: "Container",
+		Items: []AdaptiveCardBody{
+			{
+				Type: "Image",
+				URL: cfg.SectionImage,
+				AltText: cfg.SectionImageDescription,
+			},
+		},
+	}
+}
 
-	return uriAction
+// Builds a Container containing a list of Fact related to build status
+func buildFactsSection(cfg config, buildSuccessful bool) AdaptiveCardBody {
+	return AdaptiveCardBody{
+		Type: "FactSet",
+		Facts: []AdaptiveCardFact{
+			{
+				Title: "Build Status",
+				Value: getValueForBuildStatus(
+					fmt.Sprintf(`<span style="color:#%s">Success</span>`, cfg.SuccessThemeColor),
+					fmt.Sprintf(`<span style="color:#%s">Fail</span>`, cfg.FailedThemeColor),
+					buildSuccessful,
+				),
+			},
+			{
+				Title: "Build Number",
+				Value: cfg.BuildNumber,
+			},
+			{
+				Title: "Git Branch",
+				Value: cfg.GitBranch,
+			},
+			{
+				Title: "Build Triggered",
+				Value: parseTimeString(cfg),
+			},
+			{
+				Title: "Workflow",
+				Value: cfg.Workflow,
+			},
+		},
+	}
+}
+
+func buildActions(cfg config, buildSuccessful bool) []AdaptiveCardAction {
+	actions := []AdaptiveCardAction{}
+	if valueOptionToBool(cfg.EnableDefaultActions) {
+		actions = append(actions, AdaptiveCardAction{
+			Type: "Action.OpenUrl",
+			Title: "Go To Repo",
+			URL: cfg.RepoURL,
+		})
+		actions = append(actions, AdaptiveCardAction{
+			Type: "Action.OpenUrl",
+			Title: "Go To Build",
+			URL: cfg.BuildURL,
+		})
+	}
+	customActions := parseActions(cfg.Actions)
+	for _, action := range customActions {
+		actions = append(actions, AdaptiveCardAction{
+			Type: "Action.OpenUrl",
+			Title: action.Text,
+			URL: action.Targets[0].URI,
+		})
+	}
+	return actions
 }
 
 // postMessage sends a message to a channel.
-func postMessage(webhookURL string, msg Message, debugEnabled bool) error {
+func postMessage(webhookURL string, msg AdaptiveCard, debugEnabled bool) error {
 	b, err := json.MarshalIndent(msg, "", "  ")
 	if err != nil {
 		return err
