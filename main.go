@@ -205,6 +205,16 @@ func postMessage(webhookURL string, msg AdaptiveCard, debugEnabled bool) error {
 		}
 	}()
 
+	if resp.StatusCode == http.StatusBadRequest {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return fmt.Errorf("server error: %s, failed to read response: %s", resp.Status, err)
+		}
+		if string(body) == "Summary or Text is required." {
+			return fmt.Errorf("server error: %s, response: %s. Please ensure that the request payload includes the required 'Summary' or 'Text' fields.", resp.Status, body)
+		}
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
@@ -216,12 +226,29 @@ func postMessage(webhookURL string, msg AdaptiveCard, debugEnabled bool) error {
 	return nil
 }
 
+func validateConfig(cfg config) error {
+	if cfg.CardTitle == "" {
+		return fmt.Errorf("CardTitle is required")
+	}
+	if cfg.SectionTitle == "" {
+		return fmt.Errorf("SectionTitle is required")
+	}
+	if cfg.SectionText == "" {
+		return fmt.Errorf("SectionText is required")
+	}
+	return nil
+}
+
 func main() {
 	var cfg config
 	if err := stepconf.Parse(&cfg); err != nil {
 		log.Fatalf("Error: %s\n", err)
 	}
 	stepconf.Print(cfg)
+
+	if err := validateConfig(cfg); err != nil {
+		log.Fatalf("Error: %s\n", err)
+	}
 
 	message := newMessage(cfg, buildSucceeded)
 	if err := postMessage(cfg.WebhookURL, message, valueOptionToBool(cfg.EnableDebug)); err != nil {

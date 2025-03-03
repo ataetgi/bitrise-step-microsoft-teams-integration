@@ -28,6 +28,7 @@ inputs:
         Primary AdaptiveCard title text.
 
         If no value is given, the default value will be the `BITRISE_APP_TITLE`.
+      is_required: true
 
   - enable_debug: "no"
     opts:
@@ -104,6 +105,7 @@ inputs:
         Sets the text value of `activityTitle` within the primary Section of the AdaptiveCard.
 
         By default, this will be set to the commit authors' name that triggered the build.
+      is_required: true
 
   - section_subtitle: $GIT_CLONE_COMMIT_MESSAGE_SUBJECT
     opts:
@@ -126,6 +128,7 @@ inputs:
 
         If desired, this is the perfect place to include release notes via the `generate-changelog` Bitrise step, however
         setting `enable_primary_section_markdown` to `yes` may be necessary to properly format the changelog content.
+      is_required: true
 
   - section_header_image:
     opts:
