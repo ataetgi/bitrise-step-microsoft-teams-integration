@@ -495,3 +495,61 @@ func TestNewMessage(t *testing.T) {
 	}
 
 }
+
+func TestPostMessage400BadRequest(t *testing.T) {
+	cfg := config{
+		WebhookURL: "https://microsoft.com/some/webhook",
+		CardTitle:  "The heading for the card",
+		SectionTitle: "Git author name",
+		SectionText:  "Commit message body",
+	}
+
+	message := newMessage(cfg, true)
+	err := postMessage(cfg.WebhookURL, message, false)
+	if err == nil || err.Error() != "server error: 400 Bad Request, response: Summary or Text is required. Please ensure that the request payload includes the required 'Summary' or 'Text' fields." {
+		t.Errorf("Test failed: expected error 'server error: 400 Bad Request, response: Summary or Text is required. Please ensure that the request payload includes the required 'Summary' or 'Text' fields.', but got %v", err)
+	}
+}
+
+func TestValidateConfig(t *testing.T) {
+	var tests = []struct {
+		input    config
+		expected error
+	}{
+		{
+			config{
+				CardTitle:    "Card Title",
+				SectionTitle: "Section Title",
+				SectionText:  "Section Text",
+			},
+			nil,
+		},
+		{
+			config{
+				SectionTitle: "Section Title",
+				SectionText:  "Section Text",
+			},
+			fmt.Errorf("CardTitle is required"),
+		},
+		{
+			config{
+				CardTitle:   "Card Title",
+				SectionText: "Section Text",
+			},
+			fmt.Errorf("SectionTitle is required"),
+		},
+		{
+			config{
+				CardTitle:    "Card Title",
+				SectionTitle: "Section Title",
+			},
+			fmt.Errorf("SectionText is required"),
+		},
+	}
+
+	for _, test := range tests {
+		if output := validateConfig(test.input); !reflect.DeepEqual(output, test.expected) {
+			t.Errorf("Test failed: config input was %v, expected %v", test.input, test.expected)
+		}
+	}
+}
