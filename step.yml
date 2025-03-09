@@ -23,11 +23,12 @@ inputs:
   - card_title: $BITRISE_APP_TITLE
     opts:
       title: "Card Title"
-      summary: "The heading text at the top of the MessageCard"
+      summary: "The heading text at the top of the AdaptiveCard"
       description: |
-        Primary MessageCard title text.
+        Primary AdaptiveCard title text.
 
         If no value is given, the default value will be the `BITRISE_APP_TITLE`.
+      is_required: true
 
   - enable_debug: "no"
     opts:
@@ -65,9 +66,9 @@ inputs:
     opts:
       category: "Markdown Rules"
       title: "Primary Section Markdown"
-      summary: "Sets whether the text fields within the MessageCard's first section should render Markdown text"
+      summary: "Sets whether the text fields within the AdaptiveCard's first section should render Markdown text"
       description: |
-        Sets whether to enable Markdown rendering for the each field of the first section of the MessageCard.
+        Sets whether to enable Markdown rendering for the each field of the first section of the AdaptiveCard.
 
         User input fields affected:
         * section_title
@@ -83,7 +84,7 @@ inputs:
       title: "Build Status Facts Markdown"
       summary: "Sets whether each of the facts should render their values as Markdown text"
       description: |
-        Sets whether to enable Markdown rendering for the default Facts within the MessageCard.
+        Sets whether to enable Markdown rendering for the default Facts within the AdaptiveCard.
 
         Fact fields affected:
         * Build Status
@@ -97,61 +98,63 @@ inputs:
 
   - section_title: $GIT_CLONE_COMMIT_AUTHOR_NAME
     opts:
-      category: "MessageCard Content"
+      category: "AdaptiveCard Content"
       title: "Section Title"
-      summary: "Text that is displayed within the MessageCard Section `activityTitle`"
+      summary: "Text that is displayed within the AdaptiveCard Section `activityTitle`"
       description: |
-        Sets the text value of `activityTitle` within the primary Section of the MessageCard.
+        Sets the text value of `activityTitle` within the primary Section of the AdaptiveCard.
 
         By default, this will be set to the commit authors' name that triggered the build.
+      is_required: true
 
   - section_subtitle: $GIT_CLONE_COMMIT_MESSAGE_SUBJECT
     opts:
-      category: "MessageCard Content"
+      category: "AdaptiveCard Content"
       title: "Section Subtitle"
-      summary: "Text that is displayed within the MessageCard Section `activitySubtitle`"
+      summary: "Text that is displayed within the AdaptiveCard Section `activitySubtitle`"
       description: |
-        Sets the text value of `activitySubtitle` within the primary Section of the MessageCard.
+        Sets the text value of `activitySubtitle` within the primary Section of the AdaptiveCard.
 
         By default, this will be set to the commit message subject that triggered the build.
 
   - section_text: $GIT_CLONE_COMMIT_MESSAGE_BODY
     opts:
-      category: "MessageCard Content"
+      category: "AdaptiveCard Content"
       title: "Section Text"
-      summary: "Text that is displayed within the MessageCard Section `text`"
+      summary: "Text that is displayed within the AdaptiveCard Section `text`"
       description: |
-        Sets the text value of `text` within the primary Section of the MessageCard. By default,
+        Sets the text value of `text` within the primary Section of the AdaptiveCard. By default,
         this will be set to the commit message body that triggered the build.
 
         If desired, this is the perfect place to include release notes via the `generate-changelog` Bitrise step, however
         setting `enable_primary_section_markdown` to `yes` may be necessary to properly format the changelog content.
+      is_required: true
 
   - section_header_image:
     opts:
-      category: "MessageCard Content"
+      category: "AdaptiveCard Content"
       title: "Section Image"
-      summary: "Image that is displayed within the MessageCard Section `activityImage`"
+      summary: "Image that is displayed within the AdaptiveCard Section `activityImage`"
 
   - section_image:
     opts:
-      category: "MessageCard Image"
+      category: "AdaptiveCard Image"
       title: "Image"
-      summary: "Image that is displayed within the MessageCard Section `images`"
+      summary: "Image that is displayed within the AdaptiveCard Section `images`"
 
   - section_image_description:
     opts:
-      category: "MessageCard Image"
+      category: "AdaptiveCard Image"
       title: "Image Description"
       summary: "A short description of the image. Typically, description is displayed in a tooltip as the user hovers their mouse over the image."
 
   - enable_default_actions: "yes"
     opts:
-      category: "MessageCard Actions"
-      title: "Default MessageCard Actions"
-      summary: "Toggles the default actions within the MessageCard."
+      category: "AdaptiveCard Actions"
+      title: "Default AdaptiveCard Actions"
+      summary: "Toggles the default actions within the AdaptiveCard."
       description: |
-        Allows for disabling the default 'Go To Repo' and 'Go To Build' MessageCard Actions if you wish to provide only your own custom actions 
+        Allows for disabling the default 'Go To Repo' and 'Go To Build' AdaptiveCard Actions if you wish to provide only your own custom actions 
         via the `actions` step input (up to a limit of 4 actions in total).
       value_options:
         - "yes"
@@ -159,9 +162,9 @@ inputs:
 
   - actions: "[]"
     opts:
-      category: "MessageCard Actions"
-      title: "MessageCard Actions"
-      summary: "Additional extra custom actions to display on the MessageCard"
+      category: "AdaptiveCard Actions"
+      title: "AdaptiveCard Actions"
+      summary: "Additional extra custom actions to display on the AdaptiveCard"
       description: |
         A stringified JSON object array of additional custom actions to display on the card.
 
@@ -214,7 +217,7 @@ inputs:
         If no value is given, the step automatically uses the `$GIT_REPOSITORY_URL` var.
 
         If a Bitrise project is configured via SSH, `$GIT_REPOSITORY_URL` is not a useable
-        URI Target for the MessageCard, so this allows for overriding this value if SSH is configured.
+        URI Target for the AdaptiveCard, so this allows for overriding this value if SSH is configured.
 
   - webhook_url:
     opts:
@@ -229,11 +232,11 @@ inputs:
 
   - timezone: UTC
     opts:
-      category: "MessageCard Content"
+      category: "AdaptiveCard Content"
       title: "Timezone"
       summary: "Sets the timezone to use for the 'Build triggered' time"
       description: |
-        Sets the timezone to use for the 'Build triggered' time in the MessageCard.
+        Sets the timezone to use for the 'Build triggered' time in the AdaptiveCard.
 
         Defaults to UTC if no value is given.
 

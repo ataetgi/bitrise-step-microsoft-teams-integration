@@ -17,12 +17,12 @@ type config struct {
 	WebhookURL string `env:"webhook_url,required"`
 
 	// Optional user inputs
-	CardTitle                    string `env:"card_title"`
+	CardTitle                    string `env:"card_title,required"`
 	SuccessThemeColor            string `env:"success_theme_color"`
 	FailedThemeColor             string `env:"failed_theme_color"`
-	SectionTitle                 string `env:"section_title"`
+	SectionTitle                 string `env:"section_title,required"`
 	SectionSubtitle              string `env:"section_subtitle"`
-	SectionText                  string `env:"section_text"`
+	SectionText                  string `env:"section_text,required"`
 	SectionHeaderImage           string `env:"section_header_image"`
 	SectionImage                 string `env:"section_image"`
 	SectionImageDescription      string `env:"section_image_description"`
